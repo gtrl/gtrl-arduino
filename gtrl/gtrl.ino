@@ -2,12 +2,18 @@
 #include <DHT.h>
 
 #define BAUD_RATE 115200
+#define CMD_READ 0x0
 
-DHT dht( 6, DHT22 );
+const int PINS[2] = { 6, 7 };
+DHT *sensors[sizeof(PINS)];
 
 void setup() {
     Serial.begin( BAUD_RATE );
-    dht.begin();
+    for( int i=0; i<2; i++ ) {
+        DHT *sensor = new DHT( PINS[i], DHT22 );
+        sensor->begin();
+        sensors[i] = sensor;
+    }
 }
 
 void loop() {
@@ -15,11 +21,11 @@ void loop() {
     if( available == 2 ) {
         uint8_t cmd = Serial.read();
         uint8_t pin = Serial.read();
-        if( cmd == 0x0 ) {
-            float t = dht.readTemperature();
-            float h = dht.readHumidity();
-            Serial.write( 0x0 );
-            Serial.write( pin );
+        if( cmd == CMD_READ ) {
+            //TODO select sensor
+            DHT *sensor = sensors[pin-1];
+            float t = sensor->readTemperature();
+            float h = sensor->readHumidity();
             Serial.write( (byte *) &t, 4 );
             Serial.write( (byte *) &h, 4 );
         }
