@@ -4,12 +4,12 @@
 #define BAUD_RATE 115200
 #define CMD_READ 0x0
 
-const int PINS[2] = { 6, 7 };
+const uint8_t PINS[1] = { 6 };
 DHT *sensors[sizeof(PINS)];
 
 void setup() {
     Serial.begin( BAUD_RATE );
-    for( int i=0; i<2; i++ ) {
+    for( uint8_t i=0; i<sizeof(PINS); i++ ) {
         DHT *sensor = new DHT( PINS[i], DHT22 );
         sensor->begin();
         sensors[i] = sensor;
@@ -22,7 +22,6 @@ void loop() {
         uint8_t cmd = Serial.read();
         uint8_t pin = Serial.read();
         if( cmd == CMD_READ ) {
-            //TODO select sensor
             DHT *sensor = sensors[pin-1];
             float t = sensor->readTemperature();
             float h = sensor->readHumidity();
